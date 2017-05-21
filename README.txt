@@ -9,3 +9,5 @@ sample should be replaced by the directory containing the webcast files for the 
 Tap spacebar once to fast-forward to the end of the contest, then tap the spacebar to advance through the contest teams.
 
 Team photos must be inside the directory images/team_photos/ and named with the username.
+
+WARNING: We are not the authors of the base code, so we do not guarantee it will work properly!
