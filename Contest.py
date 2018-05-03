@@ -238,7 +238,7 @@ class Contest (object):
         for teamID in self.teamDetails.keys():
             teamSolved, teamPenalty, teamEarliest = 0, 0, 301 # 301 == infinity
             for probErrors, probPending, probTime in self.teamDetails[teamID]:
-                if probTime:
+                if probTime is not None:
                     teamSolved += 1
                     teamPenalty += probTime + probErrors * 20
                     teamEarliest = min(teamEarliest, probTime)
