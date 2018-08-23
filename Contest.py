@@ -59,10 +59,14 @@ class Contest (object):
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
         self.numTeams = int(self.numTeams)
         self.numProblems = int(self.numProblems)
+        nT = 0
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
-            self.teamMap[teamID] = (teamUni, teamName)
+            if teamID.startswith('teamspsp'):
+            	self.teamMap[teamID] = (teamUni, teamName)
+            	nT += 1
+        self.numTeams = nT
         self.unannouncedTeams = self.teamMap.keys()
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -138,6 +142,10 @@ class Contest (object):
             runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
             runID = int(runID)
             runTime = int(runTime)
+
+            if not runTeam.startswith('teamspsp'):
+                continue
+                
             assert self.teamMap.has_key(runTeam), runTeam
             runProb = ord(runProb) - ord('A')
             assert runAnswer in ('Y', 'N', '?')

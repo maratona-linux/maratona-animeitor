@@ -156,7 +156,7 @@ class ScoreboardHandler (Handler):
 
         Handler.contest.rank_teams()
         numTeams = len(Handler.contest.teamRanking)
-        baseY = -self.offsetY + 48 + self.teamHeight * (numTeams - 1)
+        baseY = -self.offsetY + 89 + self.teamHeight * (numTeams - 1)
         for rank, teamID in Handler.contest.teamRanking[::-1]:
             moveY = 0
             if self.moveMap.has_key(teamID):
@@ -168,7 +168,7 @@ class ScoreboardHandler (Handler):
                 self.pendingScroll = baseY + moveY - 408 + self.teamHeight / 2
 
             # only draw stuff that will appear on-screen
-            if -self.teamHeight + 40 < baseY < 768:
+            if -self.teamHeight + 81 < baseY < 768:
                 if rank >= 100:
                     rank = u'\u221E'
                 else:
@@ -178,7 +178,7 @@ class ScoreboardHandler (Handler):
                     rank, '#999999'), \
                     (0, baseY, 60, self.teamHeight), 'rc')
 
-            if -self.teamHeight + 40 < baseY + moveY < 768:
+            if -self.teamHeight + 81 < baseY + moveY < 768:
                 team = Team(teamID)
                 get_screen().blit(team.draw(self.lockTo == team.key), (68, baseY + moveY))
 
@@ -192,15 +192,19 @@ class ScoreboardHandler (Handler):
         return self
     
     def draw_header(self):
-        draw_rect(get_screen(), (-1, -1, 1026, 41), '#333333', '#FFFFFF', 1)
+        draw_rect(get_screen(), (-1, -1, 1026, 82), '#333333', '#FFFFFF', 1)
         
+        block_blit(get_screen(),
+            render(font('bold', 24), 'SPSP', '#FFFFFF'),
+            (68, 6, 0, 0), 'lt')
+
         contest_time = min(Handler.contest.revealUntil,
                            Handler.contest.elapsed_time() // 60)
         time_string = "%d minutos" % (contest_time, )
         time_string = time_string.replace('-', u'\u2212')
         block_blit(get_screen(),
             render(font('bold', 24), time_string, '#FFFFFF'),
-            (68, 6, 0, 0), 'lt')
+            (68, 47, 0, 0), 'lt')
 
         shuffle_index = len([_ for _ in Handler.contest.shuffledProblem if _])
         probX = 918
@@ -215,7 +219,7 @@ class ScoreboardHandler (Handler):
                 problem_letter = chr(ord('A') + probID)
             block_blit(get_screen(),
                 render(font('bold', 32), problem_letter, '#FFFFFF'),
-                (probX, 0, 40, 0), 'ct')
+                (probX, 41, 40, 0), 'ct')
             probX -= 44
 
     def setup_animation(self):
