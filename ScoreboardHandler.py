@@ -41,6 +41,8 @@ class ScoreboardHandler (Handler):
         self.ffLength = 100000.0 #velocidade do relogio no ffMode (diminua para deixar mais rapido)
 
         pygame.mouse.set_visible(False)
+
+        self.blockTick = False
     
     def on_event(self, event):
         if Handler.on_event(self, event):
@@ -80,8 +82,25 @@ class ScoreboardHandler (Handler):
                         self.attractTimer.reset()
                     Handler.contest.newRunList = [[]]
                     return True
-    
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+            Handler.contest.setSite(1)
+            self.blockTick = True
+            Handler.contest.reload_data()
+            self.setup_animation()
+            self.blockTick = False
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            Handler.contest.setSite(-1)
+            self.blockTick = True
+            Handler.contest.reload_data()
+            self.setup_animation()
+            self.blockTick = False
+
+
+
     def tick(self):
+        if self.blockTick:
+            return self
+
         Handler.tick(self)
         if self.nextHandler != self:
             nextHandler, self.nextHandler = self.nextHandler, self
@@ -194,8 +213,11 @@ class ScoreboardHandler (Handler):
     def draw_header(self):
         draw_rect(get_screen(), (-1, -1, 1026, 82), '#333333', '#FFFFFF', 1)
         
+        siteName = Handler.contest.getSite().upper()
+        if not siteName:
+            siteName = 'GLOBAL'
         block_blit(get_screen(),
-            render(font('bold', 24), 'SPSP', '#FFFFFF'),
+            render(font('bold', 24), siteName, '#FFFFFF'),
             (68, 6, 0, 0), 'lt')
 
         contest_time = min(Handler.contest.revealUntil,

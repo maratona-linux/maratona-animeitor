@@ -38,6 +38,30 @@ class Contest (object):
         self.visibleProblems = []
 
         self.oldTeamRanking = self.rank_teams()
+        self.sitesList = ['']
+        self.siteIdx = 0
+
+    def getSite(self):
+        return self.sitesList[self.siteIdx]
+
+    def setSite(self, direction):
+        if direction > 0:
+            if self.siteIdx < len(self.sitesList) - 1:
+                self.siteIdx += 1
+            else:
+                self.siteIdx = 0
+        elif direction < 0:
+            if self.siteIdx > 0:
+                self.siteIdx -= 1
+            else:
+                self.siteIdx = len(self.sitesList) - 1
+
+    def buildSitesList(self):
+        teams = list(set([ t[4:8] for t in self.teamMap.keys()
+            if not t.startswith('teamccl') ]))
+        teams.sort()
+        self.sitesList += teams
+
 
     def load_contest(self):
         inFile = urllib.urlopen(self.baseDir + '/contest')
@@ -59,18 +83,23 @@ class Contest (object):
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
         self.numTeams = int(self.numTeams)
         self.numProblems = int(self.numProblems)
+        self.teamMap = {}
         nT = 0
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
-            if teamID.startswith('teamspsp'):
+            if teamID.startswith('team'+self.getSite()):
             	self.teamMap[teamID] = (teamUni, teamName)
             	nT += 1
         self.numTeams = nT
         self.unannouncedTeams = self.teamMap.keys()
 
+        if len(self.sitesList) == 1:
+            self.buildSitesList()
+
         line = inFile.readline().decode('utf-8').strip('\r\n')
         _, self.numProblemGroups = map(int, line.split('\x1c'))
+        self.problemGroups = []
         for i in range(self.numProblemGroups):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             groupSize, groupVisible = line.split('\x1c')
@@ -102,6 +131,7 @@ class Contest (object):
     def load_photos(self):
         sys.stderr.write('Loading photos: ')
         failedTeams = []
+        self.teamPhotos = {}
         for teamID in self.teamMap:
             try:
                 raw_photo = image('team_photos/' + teamID + '.jpg')
@@ -143,7 +173,7 @@ class Contest (object):
             runID = int(runID)
             runTime = int(runTime)
 
-            if not runTeam.startswith('teamspsp'):
+            if not runTeam.startswith('team'+self.getSite()):
                 continue
                 
             assert self.teamMap.has_key(runTeam), runTeam
@@ -163,6 +193,7 @@ class Contest (object):
 
         inFile.close()
 
+
     def load_clock(self):
         inFile = urllib.urlopen(self.baseDir + '/time')
 
@@ -177,6 +208,12 @@ class Contest (object):
         self.load_runs()
         self.load_clock()
 
+    def reload_data(self):
+        self.load_contest()
+        self.refresh_runs()
+        self.load_clock()
+        self.oldTeamRanking = self.rank_teams()
+
     def refresh_runs(self):
         oldRunList = self.runList[:]
         self.oldTeamRanking = self.teamRanking
@@ -189,6 +226,7 @@ class Contest (object):
                 self.newRunList[-1].append(run)
             else:
                 oldRunList.remove(run)
+        
 
     def unblind_runs(self):
         oldRunList = self.runList
