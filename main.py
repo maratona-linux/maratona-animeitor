@@ -6,6 +6,7 @@ import sys, pygame
 from util import *
 from Handler import Handler
 from ScoreboardHandler import ScoreboardHandler
+from AwardsHandler import AwardsHandler
 from Contest import Contest, InvalidWebcastError
 
 def main():
@@ -18,7 +19,10 @@ def main():
             Handler.contest = contest
             contest.load_data()
             init_pygame()
-            handler = ScoreboardHandler()
+            if sys.argv[2]:
+                handler = AwardsHandler()
+            else:
+                handler = ScoreboardHandler()
         except InvalidWebcastError:
             print u'O webcast fornecido é inválido.'
             print u'Verifique se o URL foi digitado corretamente:'

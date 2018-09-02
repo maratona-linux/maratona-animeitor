@@ -53,7 +53,8 @@ class Contest (object):
         self.freezeTime = int(self.freezeTime)
         self.penaltyTime = int(self.penaltyTime)
 
-        self.revealUntil = self.freezeTime
+        # self.revealUntil = self.freezeTime
+        self.revealUntil = self.contestTime
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
@@ -63,7 +64,12 @@ class Contest (object):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
             self.teamMap[teamID] = (teamUni, teamName)
-        self.unannouncedTeams = self.teamMap.keys()
+
+        # tmp = ['teamspsp6', 'teampeol30', 'teamsppi39', 'teammgbe10', 'teamspta19',
+        #        'teamspta19', 'teamprgu20', 'teampeol15', 'teamrjrj10', 'teamsppi6',
+        #        'teamdfbr10', 'teamamma10']
+
+        self.unannouncedTeams = self.teamMap.keys() # [ t for t in self.teamMap.keys() if t in tmp ]
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         _, self.numProblemGroups = map(int, line.split('\x1c'))

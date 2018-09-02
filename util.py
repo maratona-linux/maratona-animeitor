@@ -12,7 +12,8 @@ def init_pygame():
     global gScreen
 
     pygame.init()
-    gScreen = pygame.display.set_mode((1024, 768), pygame.FULLSCREEN)
+    # gScreen = pygame.display.set_mode((1024, 768), pygame.FULLSCREEN)
+    gScreen = pygame.display.set_mode((1024, 768), pygame.RESIZABLE)
     get_screen().fill(color('#000000'))
 
     pygame.key.set_repeat(50, 50)
