@@ -9,7 +9,7 @@ from Handler import Handler
 from TeamHandler import TeamHandler
 from Contest import Contest
 
-class AwardsHandler (Handler):
+class SubRegionalAwardsHandler (Handler):
     def __init__(self):
         Handler.__init__(self)
 
@@ -55,6 +55,9 @@ class AwardsHandler (Handler):
             #     return True
             if not self.awardsMode:
                 self.awardsMode = True
+                self.animationSpeed = 5000.0
+                Handler.contest.unblind_announced_teams()
+                Handler.contest.rank_teams()
                 Handler.contest.newRunList = [[]]
             if self.awardsMode:
                 lowestTeamList = [_[1] for _ in Handler.contest.teamRanking[::-1] \
@@ -80,6 +83,7 @@ class AwardsHandler (Handler):
                         self.lockTo = lowestTeamList[1]
                     else:
                         self.lockTo = None
+                        self.attractSpeed = 1000
                         self.attractTimer.reset()
                     Handler.contest.newRunList = [[]]
                     return True
@@ -160,7 +164,6 @@ class AwardsHandler (Handler):
 
         Handler.contest.rank_teams()
         numTeams = len(Handler.contest.teamRanking)
-        print numTeams
         baseY = -self.offsetY + 48 + self.teamHeight * (numTeams - 1)
         for rank, teamID in Handler.contest.teamRanking[::-1]:
             moveY = 0
@@ -174,7 +177,7 @@ class AwardsHandler (Handler):
 
             # only draw stuff that will appear on-screen
             if -self.teamHeight + 40 < baseY < 768:
-                if rank >= 999:
+                if rank > 999:
                     rank = u'\u221E'
                 else:
                     rank = str(rank)

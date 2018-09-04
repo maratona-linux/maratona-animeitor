@@ -65,11 +65,16 @@ class Contest (object):
             teamID, teamUni, teamName = line.split('\x1c')
             self.teamMap[teamID] = (teamUni, teamName)
 
-        # tmp = ['teamspsp6', 'teampeol30', 'teamsppi39', 'teammgbe10', 'teamspta19',
-        #        'teamspta19', 'teamprgu20', 'teampeol15', 'teamrjrj10', 'teamsppi6',
-        #        'teamdfbr10', 'teamamma10']
+        self.unannouncedTeams = ['teamspsp6', 'teampeol30', 'teamsppi39', 
+                                 'teammgbe10', 'teamspta19', 'teamspsp1',
+                                 'teamprgu20', 'teampeol5', 'teamrjrj10', 
+                                 'teamsppi6', 'teamdfbr10', 'teamamma10',
+                                 'teamamma5', 'teamspta11']
 
-        self.unannouncedTeams = self.teamMap.keys() # [ t for t in self.teamMap.keys() if t in tmp ]
+        # for team in self.unannouncedTeams:
+        #     assert self.teamMap.has_key(team)
+
+        # self.unannouncedTeams = self.teamMap.keys() # [ t for t in self.teamMap.keys() if t in tmp ]
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         _, self.numProblemGroups = map(int, line.split('\x1c'))
@@ -159,6 +164,12 @@ class Contest (object):
         for run in self.blindRunList:
             self.runList.append(run[:4] + ('?', ))
 
+        for i in xrange(len(self.runList)):
+            if i < len(self.runList) - len(self.blindRunList):
+                assert self.runList[i][4] != '?'
+            else:
+                assert self.runList[i][4] == '?'
+
         inFile.close()
 
     def load_clock(self):
@@ -187,6 +198,23 @@ class Contest (object):
                 self.newRunList[-1].append(run)
             else:
                 oldRunList.remove(run)
+
+
+    def unblind_announced_teams(self):
+        self.oldTeamRanking = self.teamRanking
+        self.teamRanking = None
+        self.newRunList = [[]]
+
+        nRuns = len(self.runList)
+        nBlinds = len(self.blindRunList)
+        for i in xrange(nRuns - nBlinds, nRuns):
+            if self.runList[i][2] in self.unannouncedTeams:
+                continue
+            self.runList[i] = self.blindRunList[i - nRuns + nBlinds]
+
+        self.blindRunList = [_ for _ in self.blindRunList 
+                             if _[2] in self.unannouncedTeams] 
+
 
     def unblind_runs(self):
         oldRunList = self.runList

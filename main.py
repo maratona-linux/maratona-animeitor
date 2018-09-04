@@ -6,7 +6,7 @@ import sys, pygame
 from util import *
 from Handler import Handler
 from ScoreboardHandler import ScoreboardHandler
-from AwardsHandler import AwardsHandler
+from SubRegionalAwardsHandler import SubRegionalAwardsHandler
 from Contest import Contest, InvalidWebcastError
 
 def main():
@@ -20,7 +20,7 @@ def main():
             contest.load_data()
             init_pygame()
             if sys.argv[2]:
-                handler = AwardsHandler()
+                handler = SubRegionalAwardsHandler()
             else:
                 handler = ScoreboardHandler()
         except InvalidWebcastError:
