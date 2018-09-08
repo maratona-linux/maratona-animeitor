@@ -210,22 +210,24 @@ class Contest (object):
 
     def reload_data(self):
         self.load_contest()
-        self.refresh_runs()
+        self.refresh_runs(True)
         self.load_clock()
         self.oldTeamRanking = self.rank_teams()
 
-    def refresh_runs(self):
+    def refresh_runs(self, changedSite=False):
         oldRunList = self.runList[:]
         self.oldTeamRanking = self.teamRanking
 
         self.load_runs()
         self.teamRanking = None
-        self.newRunList = self.newRunList[-12:] + [[]]
-        for run in self.runList:
-            if run not in oldRunList:
-                self.newRunList[-1].append(run)
-            else:
-                oldRunList.remove(run)
+        
+        if not changedSite:
+            self.newRunList = self.newRunList[-12:] + [[]]
+            for run in self.runList:
+                if run not in oldRunList:
+                    self.newRunList[-1].append(run)
+                else:
+                    oldRunList.remove(run)
         
 
     def unblind_runs(self):
