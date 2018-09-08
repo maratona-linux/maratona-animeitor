@@ -86,12 +86,18 @@ class ScoreboardHandler (Handler):
             Handler.contest.setSite(1)
             self.blockTick = True
             Handler.contest.reload_data()
+            self.maxOffsetY = len(Handler.contest.teamMap.items()) * self.teamHeight
+            self.attractTimer.reset()
+            self.refreshTimer.reset()
             self.setup_animation()
             self.blockTick = False
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
             Handler.contest.setSite(-1)
             self.blockTick = True
             Handler.contest.reload_data()
+            self.maxOffsetY = len(Handler.contest.teamMap.items()) * self.teamHeight
+            self.attractTimer.reset()
+            self.refreshTimer.reset()
             self.setup_animation()
             self.blockTick = False
 
@@ -188,12 +194,16 @@ class ScoreboardHandler (Handler):
 
             # only draw stuff that will appear on-screen
             if -self.teamHeight + 81 < baseY < 768:
-                if rank >= 100:
+                if rank >= 999:
                     rank = u'\u221E'
                 else:
                     rank = str(rank)
+                # block_blit(get_screen(), \
+                #   render(font('italic', 52), \
+                #     rank, '#999999'), \
+                #     (0, baseY, 60, self.teamHeight), 'rc')
                 block_blit(get_screen(), \
-                  render(font('italic', 52), \
+                  render(font('italic', 34), \
                     rank, '#999999'), \
                     (0, baseY, 60, self.teamHeight), 'rc')
 
