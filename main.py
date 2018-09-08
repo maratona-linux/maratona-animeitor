@@ -13,6 +13,9 @@ def main():
         print u'Uso: %s <webcast>' % (sys.argv[0], )
         sys.exit(1)
     else:
+    	print u'Placar com rotação de sedes implementado exclusivamente para 1a fase' + \
+    		u' da Maratona de Programação Brasileira\n'
+
         try:
             contest = Contest(sys.argv[1])
             Handler.contest = contest
