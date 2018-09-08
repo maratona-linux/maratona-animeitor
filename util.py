@@ -5,6 +5,8 @@ import math
 import re
 
 import pygame
+import os
+import os.path
 
 gScreen = None
 
@@ -132,3 +134,10 @@ def cubic_spline(u):
     u = 2.0 * (u - 0.25)
     return 3 * u**2 - 2 * u**3
 
+def lockFiles():
+	with open('.pylock', 'w'):
+		pass
+
+def unlockFiles():
+	if os.path.exists('.pylock'):
+		os.remove('.pylock')

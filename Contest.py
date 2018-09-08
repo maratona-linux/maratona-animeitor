@@ -8,6 +8,8 @@ import textwrap
 
 from util import *
 import exceptions
+import os.path
+import time
 
 class InvalidWebcastError (exceptions.Exception):
     pass
@@ -64,6 +66,10 @@ class Contest (object):
 
 
     def load_contest(self):
+        while os.path.exists('.lock'):
+            time.sleep(0.5)
+        lockFiles()
+
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -127,6 +133,7 @@ class Contest (object):
         self.visibleProblems.reverse()
 
         inFile.close()
+        unlockFiles()
 
     def load_photos(self):
         sys.stderr.write('Loading photos: ')
@@ -165,6 +172,10 @@ class Contest (object):
                 sys.exit(0)
 
     def load_runs(self):
+        while os.path.exists('.lock'):
+            time.sleep(0.5)
+        lockFiles()
+
         inFile = urllib.urlopen(self.baseDir + '/runs')
         self.runList = []
         for line in inFile.readlines():
@@ -192,15 +203,20 @@ class Contest (object):
             self.runList.append(run[:4] + ('?', ))
 
         inFile.close()
-
+        unlockFiles()
 
     def load_clock(self):
+        while os.path.exists('.lock'):
+            time.sleep(0.5)
+        lockFiles()
+
         inFile = urllib.urlopen(self.baseDir + '/time')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.clockOffset = gTimer.clock - int(line) * 1000
 
         inFile.close()
+        unlockFiles()
 
     def load_data(self):
         self.load_contest()
