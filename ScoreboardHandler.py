@@ -48,7 +48,7 @@ class ScoreboardHandler (Handler):
         if Handler.on_event(self, event):
             return True
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and \
-           self.keyTimer.clock > 200:
+          self.keyTimer.clock > 200:
             self.keyTimer.reset()
             if Handler.contest.revealUntil < Handler.contest.contestTime:
                 self.ffMode = True
@@ -82,7 +82,9 @@ class ScoreboardHandler (Handler):
                         self.attractTimer.reset()
                     Handler.contest.newRunList = [[]]
                     return True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT and \
+          self.keyTimer.clock > 200:
+            self.keyTimer.reset()
             Handler.contest.setSite(1)
             self.blockTick = True
             Handler.contest.reload_data()
@@ -91,7 +93,9 @@ class ScoreboardHandler (Handler):
             self.refreshTimer.reset()
             self.setup_animation()
             self.blockTick = False
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT and \
+          self.keyTimer.clock > 200:
+            self.keyTimer.reset()
             Handler.contest.setSite(-1)
             self.blockTick = True
             Handler.contest.reload_data()
@@ -100,8 +104,7 @@ class ScoreboardHandler (Handler):
             self.refreshTimer.reset()
             self.setup_animation()
             self.blockTick = False
-
-
+            
 
     def tick(self):
         if self.blockTick:
