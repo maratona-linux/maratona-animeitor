@@ -43,6 +43,8 @@ class Contest (object):
         self.sitesList = ['']
         self.siteIdx = 0
 
+        self.hasCcl = False
+
     def getSite(self):
         return self.sitesList[self.siteIdx]
 
@@ -87,14 +89,15 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numTeams = int(self.numTeams)
-        self.numProblems = int(self.numProblems)
         self.teamMap = {}
         nT = 0
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
-            if teamID.startswith('team'+self.getSite()):
+            if teamID.startswith('teamccl') and not self.hasCcl:
+                continue
+            if teamID.startswith('team'+self.getSite()) \
+              or teamID.startswith('teamccl'+self.getSite()):
             	self.teamMap[teamID] = (teamUni, teamName)
             	nT += 1
         self.numTeams = nT
@@ -184,6 +187,8 @@ class Contest (object):
             runID = int(runID)
             runTime = int(runTime)
 
+            if runTeam.startswith('teamccl') and not self.hasCcl:
+                continue
             if not runTeam.startswith('team'+self.getSite()):
                 continue
                 

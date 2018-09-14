@@ -19,6 +19,10 @@ def main():
         try:
             contest = Contest(sys.argv[1])
             Handler.contest = contest
+            if len(sys.argv) > 2:
+                contest.hasCcl = True
+                print 'Incluindo cafe com leite'
+                
             contest.load_data()
             init_pygame()
             handler = ScoreboardHandler()
