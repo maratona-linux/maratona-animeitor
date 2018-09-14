@@ -17,12 +17,13 @@ def main():
         try:
             contest = Contest(sys.argv[1])
             Handler.contest = contest
+            if len(sys.argv) > 2:
+                contest.hasCcl = True
+                print 'Incluindo cafe com leite'
+            
             contest.load_data()
             init_pygame()
-            if sys.argv[2]:
-                handler = SubRegionalAwardsHandler()
-            else:
-                handler = ScoreboardHandler()
+            handler = SubRegionalAwardsHandler()
         except InvalidWebcastError:
             print u'O webcast fornecido é inválido.'
             print u'Verifique se o URL foi digitado corretamente:'

@@ -39,6 +39,8 @@ class Contest (object):
 
         self.oldTeamRanking = self.rank_teams()
 
+        self.hasCcl = False
+
     def load_contest(self):
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
@@ -58,12 +60,13 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numTeams = int(self.numTeams)
-        self.numProblems = int(self.numProblems)
+        # self.numTeams = int(self.numTeams)
+        # self.numProblems = int(self.numProblems)
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
-            self.teamMap[teamID] = (teamUni, teamName)
+            if self.hasCcl or not teamID.startswith('teamccl'):
+                self.teamMap[teamID] = (teamUni, teamName)
 
         self.unannouncedTeams = ['teamspsp6', 'teampeol30', 'teamsppi39', 
                                  'teammgbe10', 'teamspta19', 'teamspsp1',
@@ -71,10 +74,7 @@ class Contest (object):
                                  'teamsppi6', 'teamdfbr10', 'teamamma10',
                                  'teamamma5', 'teamspta11']
 
-        # for team in self.unannouncedTeams:
-        #     assert self.teamMap.has_key(team)
 
-        # self.unannouncedTeams = self.teamMap.keys() # [ t for t in self.teamMap.keys() if t in tmp ]
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         _, self.numProblemGroups = map(int, line.split('\x1c'))
@@ -147,6 +147,8 @@ class Contest (object):
         for line in inFile.readlines():
             line = line.strip().decode('utf-8')
             runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
+            if runTeam.startswith('teamccl') and not self.hasCcl:
+                continue
             runID = int(runID)
             runTime = int(runTime)
             assert self.teamMap.has_key(runTeam), runTeam
@@ -157,18 +159,17 @@ class Contest (object):
         if self.revealUntil != None:
             self.runList = [_ for _ in self.runList \
               if _[1] <= self.revealUntil]
-        self.blindRunList = [_ for _ in self.runList if _[1] >= self.blindTime]
-        self.runList = [_ for _ in self.runList if _[1] < self.blindTime]
+        self.blindRunList = [_ for _ in self.runList 
+                                if _[1] >= self.blindTime 
+                                and _[2] in self.unannouncedTeams]
+        self.runList = [_ for _ in self.runList 
+                                if _[1] < self.blindTime
+                                or _[2] not in self.unannouncedTeams]
 
         # destroy acceptance information
         for run in self.blindRunList:
             self.runList.append(run[:4] + ('?', ))
 
-        for i in xrange(len(self.runList)):
-            if i < len(self.runList) - len(self.blindRunList):
-                assert self.runList[i][4] != '?'
-            else:
-                assert self.runList[i][4] == '?'
 
         inFile.close()
 
@@ -198,23 +199,6 @@ class Contest (object):
                 self.newRunList[-1].append(run)
             else:
                 oldRunList.remove(run)
-
-
-    def unblind_announced_teams(self):
-        self.oldTeamRanking = self.teamRanking
-        self.teamRanking = None
-        self.newRunList = [[]]
-
-        nRuns = len(self.runList)
-        nBlinds = len(self.blindRunList)
-        for i in xrange(nRuns - nBlinds, nRuns):
-            if self.runList[i][2] in self.unannouncedTeams:
-                continue
-            self.runList[i] = self.blindRunList[i - nRuns + nBlinds]
-
-        self.blindRunList = [_ for _ in self.blindRunList 
-                             if _[2] in self.unannouncedTeams] 
-
 
     def unblind_runs(self):
         oldRunList = self.runList

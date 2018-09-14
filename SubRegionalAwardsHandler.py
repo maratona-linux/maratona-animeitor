@@ -30,7 +30,7 @@ class SubRegionalAwardsHandler (Handler):
         self.lockTo = None
 
         self.attractTimer = Timer()
-        self.attractSpeed = 50 #1000
+        self.attractSpeed = 250 #1000
 
         self.refreshTimer = Timer()
         self.refreshFreq = 5000
@@ -56,8 +56,6 @@ class SubRegionalAwardsHandler (Handler):
             if not self.awardsMode:
                 self.awardsMode = True
                 self.animationSpeed = 5000.0
-                Handler.contest.unblind_announced_teams()
-                Handler.contest.rank_teams()
                 Handler.contest.newRunList = [[]]
             if self.awardsMode:
                 lowestTeamList = [_[1] for _ in Handler.contest.teamRanking[::-1] \
