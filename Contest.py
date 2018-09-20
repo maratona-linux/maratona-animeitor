@@ -39,7 +39,7 @@ class Contest (object):
 
         self.oldTeamRanking = self.rank_teams()
 
-    def load_contest(self):
+    def load_contest(self, minusProbs):
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -57,8 +57,7 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numTeams = int(self.numTeams)
-        self.numProblems = int(self.numProblems)
+        self.numProblems -= minusProbs
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
@@ -70,7 +69,7 @@ class Contest (object):
         for i in range(self.numProblemGroups):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             groupSize, groupVisible = line.split('\x1c')
-            groupSize = int(groupSize)
+            groupSize = int(groupSize) - minusProbs
             self.problemGroups.append((groupSize, groupVisible))
             
         random.seed(self.name)
@@ -163,8 +162,8 @@ class Contest (object):
 
         inFile.close()
 
-    def load_data(self):
-        self.load_contest()
+    def load_data(self, minusProbs):
+        self.load_contest(minusProbs)
         self.load_photos()
         self.load_runs()
         self.load_clock()
