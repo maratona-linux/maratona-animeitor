@@ -11,27 +11,27 @@ from Contest import Contest, InvalidWebcastError
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('dir_webcast', help='Diretório dos arquivos webcast')
-    parser.add_argument('-p', '--probs_wu', type=int, metavar='N',
-        help='Ajuste da quantidade de problemas removendo N problemas do warm-up',
+    parser.add_argument('webcast_dir', help='Webcast files directory')
+    parser.add_argument('-p', '--probs_ajust', type=int, metavar='N',
+        help='Removes N problems from the defined problem quantity in the contest file',
         default=0)
-    parser.add_argument('-j', '--janela', action='store_true',
-        help='Apresenta o placar em uma janela')
+    parser.add_argument('-w', '--window_mode', action='store_true',
+        help='Shows scoreboard in a window')
     args = parser.parse_args()
 
     try:
-        contest = Contest(args.dir_webcast)
+        contest = Contest(args.webcast_dir)
         Handler.contest = contest
-        contest.load_data(args.probs_wu)
-        init_pygame(args.janela)
+        contest.load_data(args.probs_ajust)
+        init_pygame(args.window_mode)
         handler = ScoreboardHandler()
     except InvalidWebcastError:
-        print u'O webcast fornecido é inválido.'
-        print u'Verifique se o URL foi digitado corretamente: %s' % (args.dir_webcast)
+        print u'The given webcast is invalid.'
+        print u'Check the typed URL: %s' % (args.webcast_dir)
         exit(1)
     except IOError, e:
-        print u'Não foi possível abrir o webcast: ' + e.strerror
-        print u'Verifique se o URL foi digitado corretamente: %s' % (args.dir_webcast)
+        print u'Could not open webcast files: ' + e.strerror
+        print u'Check the typed URL: %s' % (args.webcast_dir)
         exit(1)
 
     while 1:

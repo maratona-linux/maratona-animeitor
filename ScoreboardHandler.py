@@ -37,8 +37,7 @@ class ScoreboardHandler (Handler):
 
         self.ffTimer = Timer()
         self.ffMode = False
-        #self.ffLength = 300000.0 #velocidade do relogio no ffMode (diminua para deixar mais rapido)
-        self.ffLength = 100000.0 #velocidade do relogio no ffMode (diminua para deixar mais rapido)
+        self.ffLength = 100000.0
 
         pygame.mouse.set_visible(False)
     

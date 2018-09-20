@@ -32,7 +32,7 @@ class Contest (object):
 
         self.teamDetails = {}
         self.teamSummary = {}
-        self.teamRanking = self.oldTeamRanking = None
+        self.teamRanking = None
 
         self.problemGroups = []
         self.visibleProblems = []
@@ -47,12 +47,8 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.contestTime, self.blindTime, self.freezeTime, self.penaltyTime = \
-            line.split('\x1c')
-        self.contestTime = int(self.contestTime)
-        self.blindTime = int(self.blindTime)
-        self.freezeTime = int(self.freezeTime)
-        self.penaltyTime = int(self.penaltyTime)
-
+            map(int, line.split('\x1c'))
+        
         self.revealUntil = self.freezeTime
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -71,6 +67,8 @@ class Contest (object):
             groupSize, groupVisible = line.split('\x1c')
             groupSize = int(groupSize) - minusProbs
             self.problemGroups.append((groupSize, groupVisible))
+
+        inFile.close()
             
         random.seed(self.name)
         self.shuffledProblem = [False] * self.numProblems
@@ -92,10 +90,8 @@ class Contest (object):
 
         self.visibleProblems.reverse()
 
-        inFile.close()
-
     def load_photos(self):
-        sys.stderr.write('Loading photos: ')
+        sys.stderr.write('Carregando fotos: ')
         failedTeams = []
         for teamID in self.teamMap:
             try:
@@ -141,10 +137,12 @@ class Contest (object):
             runProb = ord(runProb) - ord('A')
             assert runAnswer in ('Y', 'N', '?')
             self.runList.append((runID, runTime, runTeam, runProb, runAnswer))
+
+        inFile.close()
+        
         self.runList.sort()
         if self.revealUntil != None:
-            self.runList = [_ for _ in self.runList \
-              if _[1] <= self.revealUntil]
+            self.runList = [_ for _ in self.runList if _[1] <= self.revealUntil]
         self.blindRunList = [_ for _ in self.runList if _[1] >= self.blindTime]
         self.runList = [_ for _ in self.runList if _[1] < self.blindTime]
 
@@ -152,15 +150,14 @@ class Contest (object):
         for run in self.blindRunList:
             self.runList.append(run[:4] + ('?', ))
 
-        inFile.close()
 
     def load_clock(self):
         inFile = urllib.urlopen(self.baseDir + '/time')
-
         line = inFile.readline().decode('utf-8').strip('\r\n')
+        inFile.close()
+
         self.clockOffset = gTimer.clock - int(line) * 1000
 
-        inFile.close()
 
     def load_data(self, minusProbs):
         self.load_contest(minusProbs)
