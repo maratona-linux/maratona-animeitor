@@ -6,6 +6,7 @@ import random
 import urllib
 import textwrap
 
+from re import match
 from util import *
 import exceptions
 
@@ -13,8 +14,14 @@ class InvalidWebcastError (exceptions.Exception):
     pass
 
 class Contest (object):
-    def __init__(self, baseDir):
-        self.baseDir = baseDir
+    def __init__(self, args):
+        self.baseDir = args.webcast_dir
+        self.minusProbs = args.probs_ajust
+        self.selectPattern = '|'.join(args.select_teams)
+        if len(args.select_teams) == 0 and len(args.remove_teams) > 0:
+            self.removePattern = '|'.join(args.remove_teams)
+        else:
+            self.removePattern = '@'
 
         self.contestTime = None
         self.freezeTime = None
@@ -39,7 +46,7 @@ class Contest (object):
 
         self.oldTeamRanking = self.rank_teams()
 
-    def load_contest(self, minusProbs):
+    def load_contest(self):
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -53,11 +60,19 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numProblems -= minusProbs
+        self.numProblems -= self.minusProbs
+
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
+            
+            if not match(self.selectPattern, teamID):
+                continue
+            if match(self.removePattern, teamID):
+                continue
+
             self.teamMap[teamID] = (teamUni, teamName)
+        
         self.unannouncedTeams = self.teamMap.keys()
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -65,7 +80,7 @@ class Contest (object):
         for i in range(self.numProblemGroups):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             groupSize, groupVisible = line.split('\x1c')
-            groupSize = int(groupSize) - minusProbs
+            groupSize = int(groupSize) - self.minusProbs
             self.problemGroups.append((groupSize, groupVisible))
 
         inFile.close()
@@ -91,7 +106,7 @@ class Contest (object):
         self.visibleProblems.reverse()
 
     def load_photos(self):
-        sys.stderr.write('Carregando fotos: ')
+        sys.stderr.write('Loading photos: ')
         failedTeams = []
         for teamID in self.teamMap:
             try:
@@ -133,6 +148,12 @@ class Contest (object):
             runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
             runID = int(runID)
             runTime = int(runTime)
+            
+            if not match(self.selectPattern, runTeam):
+                continue
+            if match(self.removePattern, runTeam):
+                continue
+            
             assert self.teamMap.has_key(runTeam), runTeam
             runProb = ord(runProb) - ord('A')
             assert runAnswer in ('Y', 'N', '?')
@@ -159,8 +180,8 @@ class Contest (object):
         self.clockOffset = gTimer.clock - int(line) * 1000
 
 
-    def load_data(self, minusProbs):
-        self.load_contest(minusProbs)
+    def load_data(self):
+        self.load_contest()
         self.load_photos()
         self.load_runs()
         self.load_clock()

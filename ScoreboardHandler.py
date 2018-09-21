@@ -156,6 +156,10 @@ class ScoreboardHandler (Handler):
         Handler.contest.rank_teams()
         numTeams = len(Handler.contest.teamRanking)
         baseY = -self.offsetY + 48 + self.teamHeight * (numTeams - 1)
+        if Handler.contest.teamRanking[::-1][0] >= 100:
+            fontsz = 34
+        else:
+            fontsz = 52
         for rank, teamID in Handler.contest.teamRanking[::-1]:
             moveY = 0
             if self.moveMap.has_key(teamID):
@@ -168,12 +172,12 @@ class ScoreboardHandler (Handler):
 
             # only draw stuff that will appear on-screen
             if -self.teamHeight + 40 < baseY < 768:
-                if rank >= 100:
+                if rank >= 1000:
                     rank = u'\u221E'
                 else:
                     rank = str(rank)
                 block_blit(get_screen(), \
-                  render(font('italic', 52), \
+                  render(font('italic', fontsz), \
                     rank, '#999999'), \
                     (0, baseY, 60, self.teamHeight), 'rc')
 
