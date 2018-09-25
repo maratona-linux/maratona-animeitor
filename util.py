@@ -8,11 +8,14 @@ import pygame
 
 gScreen = None
 
-def init_pygame():
+def init_pygame(window_mode):
     global gScreen
 
     pygame.init()
-    gScreen = pygame.display.set_mode((1024, 768), pygame.FULLSCREEN)
+    if window_mode:
+        gScreen = pygame.display.set_mode((1024, 768), pygame.RESIZABLE)
+    else:
+        gScreen = pygame.display.set_mode((1024, 768), pygame.FULLSCREEN)
     get_screen().fill(color('#000000'))
 
     pygame.key.set_repeat(50, 50)
@@ -131,3 +134,12 @@ def cubic_spline(u):
     u = 2.0 * (u - 0.25)
     return 3 * u**2 - 2 * u**3
 
+def lockFiles():
+    while os.path.exists('.lock'):
+        time.sleep(0.25)
+    with open('.pylock', 'w'):
+        pass
+
+def releaseFiles():
+    if os.path.exists('.pylock'):
+        os.remove('.pylock')

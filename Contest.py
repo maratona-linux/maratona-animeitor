@@ -6,6 +6,7 @@ import random
 import urllib
 import textwrap
 
+from re import match
 from util import *
 import exceptions
 
@@ -13,8 +14,14 @@ class InvalidWebcastError (exceptions.Exception):
     pass
 
 class Contest (object):
-    def __init__(self, baseDir):
-        self.baseDir = baseDir
+    def __init__(self, args):
+        self.baseDir = args.webcast_dir
+        self.minusProbs = args.probs_ajust
+        self.selectPattern = '|'.join(args.select_teams)
+        if len(args.select_teams) == 0 and len(args.remove_teams) > 0:
+            self.removePattern = '|'.join(args.remove_teams)
+        else:
+            self.removePattern = '@'
 
         self.contestTime = None
         self.freezeTime = None
@@ -32,7 +39,7 @@ class Contest (object):
 
         self.teamDetails = {}
         self.teamSummary = {}
-        self.teamRanking = self.oldTeamRanking = None
+        self.teamRanking = None
 
         self.problemGroups = []
         self.visibleProblems = []
@@ -40,6 +47,7 @@ class Contest (object):
         self.oldTeamRanking = self.rank_teams()
 
     def load_contest(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -47,22 +55,25 @@ class Contest (object):
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.contestTime, self.blindTime, self.freezeTime, self.penaltyTime = \
-            line.split('\x1c')
-        self.contestTime = int(self.contestTime)
-        self.blindTime = int(self.blindTime)
-        self.freezeTime = int(self.freezeTime)
-        self.penaltyTime = int(self.penaltyTime)
-
+            map(int, line.split('\x1c'))
+        
         self.revealUntil = self.freezeTime
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
         self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numTeams = int(self.numTeams)
-        self.numProblems = int(self.numProblems)
+        self.numProblems -= self.minusProbs
+
         for i in range(self.numTeams):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             teamID, teamUni, teamName = line.split('\x1c')
+            
+            if not match(self.selectPattern, teamID):
+                continue
+            if match(self.removePattern, teamID):
+                continue
+
             self.teamMap[teamID] = (teamUni, teamName)
+        
         self.unannouncedTeams = self.teamMap.keys()
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -70,8 +81,11 @@ class Contest (object):
         for i in range(self.numProblemGroups):
             line = inFile.readline().decode('utf-8').strip('\r\n')
             groupSize, groupVisible = line.split('\x1c')
-            groupSize = int(groupSize)
+            groupSize = int(groupSize) - self.minusProbs
             self.problemGroups.append((groupSize, groupVisible))
+
+        inFile.close()
+        releaseFiles()
             
         random.seed(self.name)
         self.shuffledProblem = [False] * self.numProblems
@@ -92,8 +106,6 @@ class Contest (object):
             curProblem += groupSize
 
         self.visibleProblems.reverse()
-
-        inFile.close()
 
     def load_photos(self):
         sys.stderr.write('Loading photos: ')
@@ -131,6 +143,7 @@ class Contest (object):
                 sys.exit(0)
 
     def load_runs(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/runs')
         self.runList = []
         for line in inFile.readlines():
@@ -138,14 +151,23 @@ class Contest (object):
             runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
             runID = int(runID)
             runTime = int(runTime)
+            
+            if not match(self.selectPattern, runTeam):
+                continue
+            if match(self.removePattern, runTeam):
+                continue
+            
             assert self.teamMap.has_key(runTeam), runTeam
             runProb = ord(runProb) - ord('A')
             assert runAnswer in ('Y', 'N', '?')
             self.runList.append((runID, runTime, runTeam, runProb, runAnswer))
+
+        inFile.close()
+        releaseFiles()
+        
         self.runList.sort()
         if self.revealUntil != None:
-            self.runList = [_ for _ in self.runList \
-              if _[1] <= self.revealUntil]
+            self.runList = [_ for _ in self.runList if _[1] <= self.revealUntil]
         self.blindRunList = [_ for _ in self.runList if _[1] >= self.blindTime]
         self.runList = [_ for _ in self.runList if _[1] < self.blindTime]
 
@@ -153,15 +175,16 @@ class Contest (object):
         for run in self.blindRunList:
             self.runList.append(run[:4] + ('?', ))
 
-        inFile.close()
 
     def load_clock(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/time')
-
         line = inFile.readline().decode('utf-8').strip('\r\n')
+        inFile.close()
+        releaseFiles()
+
         self.clockOffset = gTimer.clock - int(line) * 1000
 
-        inFile.close()
 
     def load_data(self):
         self.load_contest()
