@@ -156,7 +156,7 @@ class ScoreboardHandler (Handler):
         Handler.contest.rank_teams()
         numTeams = len(Handler.contest.teamRanking)
         baseY = -self.offsetY + 48 + self.teamHeight * (numTeams - 1)
-        if Handler.contest.teamRanking[::-1][0] >= 100:
+        if Handler.contest.teamRanking[::-1][0][0] >= 100:
             fontsz = 34
         else:
             fontsz = 52
