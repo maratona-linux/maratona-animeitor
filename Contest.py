@@ -47,6 +47,7 @@ class Contest (object):
         self.oldTeamRanking = self.rank_teams()
 
     def load_contest(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/contest')
 
         line = inFile.readline().decode('utf-8').strip('\r\n')
@@ -84,6 +85,7 @@ class Contest (object):
             self.problemGroups.append((groupSize, groupVisible))
 
         inFile.close()
+        releaseFiles()
             
         random.seed(self.name)
         self.shuffledProblem = [False] * self.numProblems
@@ -141,6 +143,7 @@ class Contest (object):
                 sys.exit(0)
 
     def load_runs(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/runs')
         self.runList = []
         for line in inFile.readlines():
@@ -160,6 +163,7 @@ class Contest (object):
             self.runList.append((runID, runTime, runTeam, runProb, runAnswer))
 
         inFile.close()
+        releaseFiles()
         
         self.runList.sort()
         if self.revealUntil != None:
@@ -173,9 +177,11 @@ class Contest (object):
 
 
     def load_clock(self):
+        lockFiles()
         inFile = urllib.urlopen(self.baseDir + '/time')
         line = inFile.readline().decode('utf-8').strip('\r\n')
         inFile.close()
+        releaseFiles()
 
         self.clockOffset = gTimer.clock - int(line) * 1000
 

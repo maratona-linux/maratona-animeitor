@@ -134,3 +134,12 @@ def cubic_spline(u):
     u = 2.0 * (u - 0.25)
     return 3 * u**2 - 2 * u**3
 
+def lockFiles():
+    while os.path.exists('.lock'):
+        time.sleep(0.25)
+    with open('.pylock', 'w'):
+        pass
+
+def releaseFiles():
+    if os.path.exists('.pylock'):
+        os.remove('.pylock')
