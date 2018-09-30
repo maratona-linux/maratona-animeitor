@@ -6,9 +6,12 @@ import random
 import urllib
 import textwrap
 
+from collections import namedtuple
 from re import match
 from util import *
 import exceptions
+
+RunTuple = namedtuple('RunTuple', ['id', 'time', 'team', 'prob', 'answer'])
 
 class InvalidWebcastError (exceptions.Exception):
     pass
@@ -160,20 +163,20 @@ class Contest (object):
             assert self.teamMap.has_key(runTeam), runTeam
             runProb = ord(runProb) - ord('A')
             assert runAnswer in ('Y', 'N', '?')
-            self.runList.append((runID, runTime, runTeam, runProb, runAnswer))
+            self.runList.append(RunTuple(runID, runTime, runTeam, runProb, runAnswer))
 
         inFile.close()
         releaseFiles()
         
         self.runList.sort()
         if self.revealUntil != None:
-            self.runList = [_ for _ in self.runList if _[1] <= self.revealUntil]
-        self.blindRunList = [_ for _ in self.runList if _[1] >= self.blindTime]
-        self.runList = [_ for _ in self.runList if _[1] < self.blindTime]
+            self.runList = [_ for _ in self.runList if _.time <= self.revealUntil]
+        self.blindRunList = [_ for _ in self.runList if _.time >= self.blindTime]
+        self.runList = [_ for _ in self.runList if _.time < self.blindTime]
 
         # destroy acceptance information
         for run in self.blindRunList:
-            self.runList.append(run[:4] + ('?', ))
+            self.runList.append(run._replace(answer='?'))
 
 
     def load_clock(self):
@@ -214,12 +217,11 @@ class Contest (object):
         for rank, teamID in self.oldTeamRanking[::-1]:
             pendingRuns = []
             for i, run in enumerate(self.blindRunList):
-                runID, runTime, runTeam, runProb, runAnswer = run
-                if runTeam != teamID:
+                if run.team != teamID:
                     continue
-                if self.teamDetails[teamID][runProb][2] != None:
+                if self.teamDetails[teamID][run.prob][2] != None:
                     continue
-                pendingRuns.append((runProb, i))
+                pendingRuns.append((run.prob, i))
             if pendingRuns == []:
                 continue
             pendingRuns.sort()
@@ -227,7 +229,7 @@ class Contest (object):
             targetRun = self.blindRunList[targetIdx]
             for i in range(len(self.runList)):
                 blindRun = self.runList[i]
-                if blindRun[0] != targetRun[0]:
+                if blindRun.id != targetRun.id:
                     continue
                 self.runList[i] = targetRun
                 self.newRunList[-1].append(targetRun)
@@ -239,20 +241,20 @@ class Contest (object):
         self.teamDetails = {}
         for teamID in self.teamMap.keys():
             teamDetail = [(0, 0, None)] * self.numProblems
-            teamRuns = [_ for _ in self.runList if _[2] == teamID]
-            for runID, runTime, runTeam, runProb, runAnswer in teamRuns:
-                probErrors, probPending, probTime = teamDetail[runProb]
+            teamRuns = [_ for _ in self.runList if _.team == teamID]
+            for run in teamRuns:
+                probErrors, probPending, probTime = teamDetail[run.prob]
                 if probTime != None:
                     continue
-                elif runAnswer == 'N':
-                    teamDetail[runProb] = \
+                elif run.answer == 'N':
+                    teamDetail[run.prob] = \
                         (probErrors + 1, probPending, probTime)
-                elif runAnswer == '?':
-                    teamDetail[runProb] = \
+                elif run.answer == '?':
+                    teamDetail[run.prob] = \
                         (probErrors, probPending + 1, probTime)
                 else:
-                    teamDetail[runProb] = \
-                        (probErrors, probPending, runTime)
+                    teamDetail[run.prob] = \
+                        (probErrors, probPending, run.time)
             self.teamDetails[teamID] = teamDetail
 
     def calc_summary(self):
