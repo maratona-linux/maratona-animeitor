@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import math
+import os
 import re
 
 import pygame
