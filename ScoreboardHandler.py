@@ -63,8 +63,8 @@ class ScoreboardHandler (Handler):
                     self.lockTo = lowestTeam
                     return True
                 pendingRuns = [_ for _ in Handler.contest.blindRunList \
-                    if _[2] == lowestTeam and \
-                    Handler.contest.teamDetails[lowestTeam][_[3]][2] == None]
+                    if _.team == lowestTeam and \
+                    Handler.contest.teamDetails[lowestTeam][_.prob][2] == None]
                 if len(pendingRuns) > 0:
                     Handler.contest.unblind_runs()
                     self.setup_animation()
@@ -127,10 +127,9 @@ class ScoreboardHandler (Handler):
                 self.attractTimer.clock = \
                         (self.offsetY * self.attractSpeed) / self.teamHeight
             self.lockTo = None
-            for runID, runTime, runTeam, runProb, runRes in \
-                Handler.contest.newRunList[-1]:
-                if runRes == 'Y':
-                    self.lockTo = runTeam
+            for run in Handler.contest.newRunList[-1]:
+                if run.answer == 'Y':
+                    self.lockTo = run.team
 
         if not self.lockTo:
             self.pendingScroll = 0
