@@ -1,8 +1,11 @@
-Use with Python 2.7, Pygame 1.9.2.
+Use with Python 2.7, Pygame 1.9.4; e.g. on Ubuntu run
+
+    sudo apt install python2.7 python-pip
+    python2.7 -m pip install -r requirements.txt
 
 Usage example:
 
-./main.py sample/
+    ./main.py sample/
 
 sample should be replaced by the directory containing the webcast files for the contest.
 
