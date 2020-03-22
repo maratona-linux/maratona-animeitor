@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import pygame
@@ -25,7 +25,7 @@ def main():
     args = parser.parse_args()
 
     if len(args.select_teams) > 0 and len(args.remove_teams) > 0:
-        print 'Warning: --remove_teams option will be ignored!'
+        print('Warning: --remove_teams option will be ignored!')
         args.remove_teams = []
 
     try:
@@ -35,12 +35,12 @@ def main():
         init_pygame(args.window_mode)
         handler = ScoreboardHandler()
     except InvalidWebcastError:
-        print u'The given webcast is invalid.'
-        print u'Check the typed URL: %s' % (args.webcast_dir)
+        print(u'The given webcast is invalid.')
+        print(u'Check the typed URL: %s' % (args.webcast_dir))
         exit(1)
-    except IOError, e:
-        print u'Could not open webcast files: ' + e.strerror
-        print u'Check the typed URL: %s' % (args.webcast_dir)
+    except IOError as e:
+        print(u'Could not open webcast files: ' + str(e))
+        print(u'Check the typed URL: %s' % (args.webcast_dir))
         exit(1)
 
     while 1:

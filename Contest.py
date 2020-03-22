@@ -1,19 +1,18 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import sys
 import random
-import urllib
 import textwrap
-
+from urllib.request import urlopen
 from collections import namedtuple
 from re import match
 from util import *
-import exceptions
+#import exceptions
 
 RunTuple = namedtuple('RunTuple', ['id', 'time', 'team', 'prob', 'answer'])
 
-class InvalidWebcastError (exceptions.Exception):
+class InvalidWebcastError (Exception): #exceptions.Exception):
     pass
 
 class Contest (object):
@@ -51,43 +50,42 @@ class Contest (object):
 
     def load_contest(self):
         lockFiles()
-        inFile = urllib.urlopen(self.baseDir + '/contest')
+        with open(self.baseDir + '/contest') as inFile:
 
-        line = inFile.readline().decode('utf-8').strip('\r\n')
-        self.name = line
+	        line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	        self.name = line
 
-        line = inFile.readline().decode('utf-8').strip('\r\n')
-        self.contestTime, self.blindTime, self.freezeTime, self.penaltyTime = \
-            map(int, line.split('\x1c'))
-        
-        self.revealUntil = self.freezeTime
+	        line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	        self.contestTime, self.blindTime, self.freezeTime, self.penaltyTime = \
+	            map(int, line.split('\x1c'))
+	        
+	        self.revealUntil = self.freezeTime
 
-        line = inFile.readline().decode('utf-8').strip('\r\n')
-        self.numTeams, self.numProblems = map(int, line.split('\x1c'))
-        self.numProblems -= self.minusProbs
+	        line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	        self.numTeams, self.numProblems = map(int, line.split('\x1c'))
+	        self.numProblems -= self.minusProbs
 
-        for i in range(self.numTeams):
-            line = inFile.readline().decode('utf-8').strip('\r\n')
-            teamID, teamUni, teamName = line.split('\x1c')
-            
-            if not match(self.selectPattern, teamID):
-                continue
-            if match(self.removePattern, teamID):
-                continue
+	        for i in range(self.numTeams):
+	            line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	            teamID, teamUni, teamName = line.split('\x1c')
+	            
+	            if not match(self.selectPattern, teamID):
+	                continue
+	            if match(self.removePattern, teamID):
+	                continue
 
-            self.teamMap[teamID] = (teamUni, teamName)
-        
-        self.unannouncedTeams = self.teamMap.keys()
+	            self.teamMap[teamID] = (teamUni, teamName)
+	        
+	        self.unannouncedTeams = list(self.teamMap.keys())
 
-        line = inFile.readline().decode('utf-8').strip('\r\n')
-        _, self.numProblemGroups = map(int, line.split('\x1c'))
-        for i in range(self.numProblemGroups):
-            line = inFile.readline().decode('utf-8').strip('\r\n')
-            groupSize, groupVisible = line.split('\x1c')
-            groupSize = int(groupSize) - self.minusProbs
-            self.problemGroups.append((groupSize, groupVisible))
+	        line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	        _, self.numProblemGroups = map(int, line.split('\x1c'))
+	        for i in range(self.numProblemGroups):
+	            line = inFile.readline().strip('\r\n') #.decode('utf-8').strip('\r\n')
+	            groupSize, groupVisible = line.split('\x1c')
+	            groupSize = int(groupSize) - self.minusProbs
+	            self.problemGroups.append((groupSize, groupVisible))
 
-        inFile.close()
         releaseFiles()
             
         random.seed(self.name)
@@ -131,13 +129,13 @@ class Contest (object):
         sys.stderr.write('\n')
         if not failedTeams:
             return
-        print 'The following teams have missing or corrupted team photos:'
-        print
-        print textwrap.fill(' '.join(failedTeams))
-        print
+        print('The following teams have missing or corrupted team photos:')
+        print()
+        print(textwrap.fill(' '.join(failedTeams)))
+        print()
         while True:
             try:
-                ans = raw_input('Continue anyway? ').lower()
+                ans = input('Continue anyway? ').lower()
             except KeyboardInterrupt:
                 ans = 'n'
             if ans == 'y':
@@ -147,25 +145,24 @@ class Contest (object):
 
     def load_runs(self):
         lockFiles()
-        inFile = urllib.urlopen(self.baseDir + '/runs')
-        self.runList = []
-        for line in inFile.readlines():
-            line = line.strip().decode('utf-8')
-            runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
-            runID = int(runID)
-            runTime = int(runTime)
-            
-            if not match(self.selectPattern, runTeam):
-                continue
-            if match(self.removePattern, runTeam):
-                continue
-            
-            assert self.teamMap.has_key(runTeam), runTeam
-            runProb = ord(runProb) - ord('A')
-            assert runAnswer in ('Y', 'N', '?')
-            self.runList.append(RunTuple(runID, runTime, runTeam, runProb, runAnswer))
+        with open(self.baseDir + '/runs') as inFile:
+	        self.runList = []
+	        for line in inFile.readlines():
+	            line = line.strip('\r\n')
+	            runID, runTime, runTeam, runProb, runAnswer = line.split('\x1c')
+	            runID = int(runID)
+	            runTime = int(runTime)
+	            
+	            if not match(self.selectPattern, runTeam):
+	                continue
+	            if match(self.removePattern, runTeam):
+	                continue
+	            
+	            assert runTeam in self.teamMap.keys(), runTeam
+	            runProb = ord(runProb) - ord('A')
+	            assert runAnswer in ('Y', 'N', '?')
+	            self.runList.append(RunTuple(runID, runTime, runTeam, runProb, runAnswer))
 
-        inFile.close()
         releaseFiles()
         
         self.runList.sort()
@@ -181,9 +178,8 @@ class Contest (object):
 
     def load_clock(self):
         lockFiles()
-        inFile = urllib.urlopen(self.baseDir + '/time')
-        line = inFile.readline().decode('utf-8').strip('\r\n')
-        inFile.close()
+        with open(self.baseDir + '/time') as inFile:
+	        line = inFile.readline().strip('\r\n')
         releaseFiles()
 
         self.clockOffset = gTimer.clock - int(line) * 1000

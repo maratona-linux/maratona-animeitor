@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import random
@@ -17,7 +17,7 @@ class TeamHandler (Handler):
     def __init__(self, teamID, returnTo, timeout = 5000.0):
         Handler.__init__(self)
         if teamID is None:
-            teamID = random.choice(Handler.contest.teamMap.keys())
+            teamID = random.choice(list(Handler.contest.teamMap.keys()))
         self.team = Team(teamID)
         self.returnTo = returnTo
 

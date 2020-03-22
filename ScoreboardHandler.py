@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import pygame
@@ -120,7 +120,7 @@ class ScoreboardHandler (Handler):
                 Handler.contest.refresh_runs()
                 self.setup_animation()
                 Handler.contest.load_clock()
-            except IOError, e:
+            except IOError as e:
                 pass
             if self.lockTo:
                 self.offsetY += self.teamHeight * 12
@@ -161,7 +161,7 @@ class ScoreboardHandler (Handler):
             fontsz = 52
         for rank, teamID in Handler.contest.teamRanking[::-1]:
             moveY = 0
-            if self.moveMap.has_key(teamID):
+            if teamID in self.moveMap.keys():
                 oldPos, newPos = self.moveMap[teamID]
                 moveY = self.teamHeight * (oldPos - newPos) * (1 - cubic_spline(self.animationTimer.clock / self.animationSpeed))
                 moveY = int(0.5 + moveY)

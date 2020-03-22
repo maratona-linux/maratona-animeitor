@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 # encoding: utf-8
 
 import math
@@ -67,12 +67,12 @@ gFontCache = {}
 
 def font(fn, size):
     fontKey = (fn, size)
-    if not gFontCache.has_key(fontKey):
+    if fontKey not in gFontCache.keys():
         gFontCache[fontKey] = pygame.font.Font('fonts/' + fn + '.ttf', size)
     return gFontCache[fontKey]
 
 def render(font, s, textColor):
-    if type(s) not in (str, unicode):
+    if type(s) != str:
         s = str(s)
     textColor = color(textColor)
 
@@ -117,7 +117,7 @@ def draw_rect(surface, rect, backColor, foreColor, borderWidth):
 _gImageCache = {}
 
 def image(filename):
-    if _gImageCache.has_key(filename):
+    if filename in _gImageCache.keys():
         return _gImageCache[filename]
     image = pygame.image.load('images/' + filename)
     _gImageCache[filename] = image
