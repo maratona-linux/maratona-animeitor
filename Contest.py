@@ -160,6 +160,7 @@ class Contest (object):
 	            
 	            assert runTeam in self.teamMap.keys(), runTeam
 	            runProb = ord(runProb) - ord('A')
+	            assert 0 <= runProb < self.numProblems
 	            assert runAnswer in ('Y', 'N', '?')
 	            self.runList.append(RunTuple(runID, runTime, runTeam, runProb, runAnswer))
 

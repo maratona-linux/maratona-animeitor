@@ -15,8 +15,12 @@ class Handler (object):
 
     def on_event(self, event):
         if event.type == pygame.QUIT:
+            pygame.display.quit()
+            pygame.quit()
             sys.exit()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+            pygame.display.quit()
+            pygame.quit()
             sys.exit()
         return False
     

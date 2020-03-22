@@ -1,7 +1,7 @@
-Use with Python 2.7, Pygame 1.9.4; e.g. on Ubuntu run
+Use with Python 3, Pygame 1.9.6; e.g. on Ubuntu run
 
-    sudo apt install python2.7 python-pip
-    python2.7 -m pip install -r requirements.txt
+    sudo apt install python3 python-pip
+    python3 -m pip install -r requirements.txt
 
 Usage example:
 
