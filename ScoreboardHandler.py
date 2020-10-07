@@ -178,7 +178,7 @@ class ScoreboardHandler (Handler):
                 moveY = int(0.5 + moveY)
             if self.lockTo == teamID:
                 # keep locked team at screen center
-                self.pendingScroll = baseY + moveY - 408 + self.teamHeight / 2
+                self.pendingScroll = baseY + moveY - 408 + self.teamHeight // 2
 
             # only draw stuff that will appear on-screen
             if -self.teamHeight + 40 < baseY < 768:
