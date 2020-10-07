@@ -101,7 +101,7 @@ class ScoreboardHandler (Handler):
         else:
             self.attractSpeed = 1000
 
-        curScroll = (abs(self.pendingScroll) + 4) / 5
+        curScroll = (abs(self.pendingScroll) + 4) // 5
         if self.pendingScroll < 0:
             curScroll *= -1
         self.offsetY += curScroll
@@ -125,7 +125,7 @@ class ScoreboardHandler (Handler):
             if self.lockTo:
                 self.offsetY += self.teamHeight * 12
                 self.attractTimer.clock = \
-                        (self.offsetY * self.attractSpeed) / self.teamHeight
+                        (self.offsetY * self.attractSpeed) // self.teamHeight
             self.lockTo = None
             for run in Handler.contest.newRunList[-1]:
                 if run.answer == 'Y':
@@ -133,11 +133,11 @@ class ScoreboardHandler (Handler):
 
         if not self.lockTo:
             self.pendingScroll = 0
-            self.offsetY = (self.teamHeight * self.attractTimer.clock) / self.attractSpeed
+            self.offsetY = (self.teamHeight * self.attractTimer.clock) // self.attractSpeed
             self.offsetY -= self.teamHeight * 12
             if self.offsetY < 0:
                 self.offsetY = 0
-            if self.offsetY > self.maxOffsetY + self.teamHeight / 2:
+            if self.offsetY > self.maxOffsetY + self.teamHeight // 2:
                 self.attractTimer.reset()
                 if self.ffMode:
                     if self.ffTimer.clock >= self.ffLength:
