@@ -174,13 +174,10 @@ class ScoreboardHandler (Handler):
             moveY = 0
             if teamID in self.moveMap.keys():
                 oldPos, newPos = self.moveMap[teamID]
+                # old equation, using float (kept line for clarity)
                 # moveY = self.teamHeight * (oldPos - newPos) * (1 - cubic_spline(self.animationTimer.clock / self.animationSpeed))
                 n = self.teamHeight * (oldPos - newPos)
-                moveY = n - int(n * cubic_spline(self.animationTimer.clock / self.animationSpeed))
-
-                # without spline:
-                # n = self.teamHeight * (oldPos - newPos)
-                # moveY = n - (n * self.animationTimer.clock) // self.animationSpeed
+                moveY = n - cubic_spline_int(n, self.animationTimer.clock, self.animationSpeed)
             if self.lockTo == teamID:
                 # keep locked team at screen center
                 self.pendingScroll = baseY + moveY - 408 + self.teamHeight // 2

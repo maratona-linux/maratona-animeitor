@@ -125,6 +125,27 @@ def image(filename):
     _gImageCache[filename] = image
     return image
 
+def cubic_spline_int(f, num, den):
+
+    if 4 * num < den:
+        return 0
+    if 4 * num > 3 * den:
+        return 1
+
+    num2 = 2 * (num*4 - den)
+    den2 = 4 * den
+
+    # u = num2/den2
+    num3 = 3 * pow(num2, 2) * pow(den2, 3) - 2 * pow(num2, 3) * pow(den2, 2)
+    den3 = pow(den2, 2) * pow(den2, 3) 
+
+    # r = 3 * u**2 - 2 * u**3
+    r = num3 / den3
+    
+    # multiplying external factor
+    r = (f * num3) // den3    
+    return r
+
 def cubic_spline(u):
     if u < 0.25:
         return 0.0
