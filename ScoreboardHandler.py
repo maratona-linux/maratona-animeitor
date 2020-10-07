@@ -93,10 +93,21 @@ class ScoreboardHandler (Handler):
         if self.ffMode:
             self.ffTimer.tick(self.delta())
             self.ffTimer.clock = min(self.ffTimer.clock, self.ffLength)
-            u = self.ffTimer.clock / self.ffLength
-            Handler.contest.revealUntil = int(0.0 + \
-              (1 - u) * Handler.contest.freezeTime + \
-                   u  * Handler.contest.contestTime)
+
+            c = self.ffTimer.clock
+            l = self.ffLength
+            t = Handler.contest.contestTime
+            f = Handler.contest.freezeTime
+
+            # original equations
+            # u = c / l
+            # d = ((1 - u) * f + u * t)
+
+            # factored equation
+            d = f + (c*(t-f)) // l
+
+            Handler.contest.revealUntil = d
+
             self.attractSpeed = 300
         else:
             self.attractSpeed = 1000
