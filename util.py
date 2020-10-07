@@ -126,16 +126,13 @@ def image(filename):
     return image
 
 def cubic_spline(u):
-    if u < 0.0:
-        u = 0.0
-    if u > 1.0:
-        u = 1.0
     if u < 0.25:
         return 0.0
     if u > 0.75:
         return 1.0
     u = 2.0 * (u - 0.25)
-    return 3 * u**2 - 2 * u**3
+    r = 3 * u**2 - 2 * u**3
+    return max(0.0, min(1.0, r))
 
 def lockFiles():
     while os.path.exists('.lock'):
