@@ -13,6 +13,8 @@ def init_pygame(window_mode):
     global gScreen
 
     pygame.init()
+    pygame.mixer.quit()
+
     if window_mode:
         gScreen = pygame.display.set_mode((1024, 768), pygame.RESIZABLE)
     else:
