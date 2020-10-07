@@ -22,6 +22,9 @@ def main():
         ' if --select_teams is used.', default=[])
     parser.add_argument('-s', '--select_teams', nargs='+', metavar='PREFIX',
         help='Select only the teams whose team id starts with PREFIX.', default=[])
+
+    parser.add_argument('-f', '--frame_rate', type=int, default=30,
+        help='Maximum framerate for the animator. Defaults to 30 fps.')
     args = parser.parse_args()
 
     if len(args.select_teams) > 0 and len(args.remove_teams) > 0:
@@ -43,10 +46,13 @@ def main():
         print(u'Check the typed URL: %s' % (args.webcast_dir))
         exit(1)
 
+    clock = pygame.time.Clock()
+    frame_rate = args.frame_rate
     while 1:
         for event in pygame.event.get():
             handler.on_event(event)
         handler = handler.tick()
+        clock.tick(frame_rate)
 
 if __name__ == '__main__':
     main()

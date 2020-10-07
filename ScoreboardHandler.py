@@ -93,15 +93,26 @@ class ScoreboardHandler (Handler):
         if self.ffMode:
             self.ffTimer.tick(self.delta())
             self.ffTimer.clock = min(self.ffTimer.clock, self.ffLength)
-            u = self.ffTimer.clock / self.ffLength
-            Handler.contest.revealUntil = int(0.0 + \
-              (1 - u) * Handler.contest.freezeTime + \
-                   u  * Handler.contest.contestTime)
+
+            c = self.ffTimer.clock
+            l = self.ffLength
+            t = Handler.contest.contestTime
+            f = Handler.contest.freezeTime
+
+            # original equations
+            # u = c / l
+            # d = ((1 - u) * f + u * t)
+
+            # factored equation
+            d = f + (c*(t-f)) // l
+
+            Handler.contest.revealUntil = d
+
             self.attractSpeed = 300
         else:
             self.attractSpeed = 1000
 
-        curScroll = (abs(self.pendingScroll) + 4) / 5
+        curScroll = (abs(self.pendingScroll) + 4) // 5
         if self.pendingScroll < 0:
             curScroll *= -1
         self.offsetY += curScroll
@@ -125,7 +136,7 @@ class ScoreboardHandler (Handler):
             if self.lockTo:
                 self.offsetY += self.teamHeight * 12
                 self.attractTimer.clock = \
-                        (self.offsetY * self.attractSpeed) / self.teamHeight
+                        (self.offsetY * self.attractSpeed) // self.teamHeight
             self.lockTo = None
             for run in Handler.contest.newRunList[-1]:
                 if run.answer == 'Y':
@@ -133,11 +144,11 @@ class ScoreboardHandler (Handler):
 
         if not self.lockTo:
             self.pendingScroll = 0
-            self.offsetY = (self.teamHeight * self.attractTimer.clock) / self.attractSpeed
+            self.offsetY = (self.teamHeight * self.attractTimer.clock) // self.attractSpeed
             self.offsetY -= self.teamHeight * 12
             if self.offsetY < 0:
                 self.offsetY = 0
-            if self.offsetY > self.maxOffsetY + self.teamHeight / 2:
+            if self.offsetY > self.maxOffsetY + self.teamHeight // 2:
                 self.attractTimer.reset()
                 if self.ffMode:
                     if self.ffTimer.clock >= self.ffLength:
@@ -163,11 +174,13 @@ class ScoreboardHandler (Handler):
             moveY = 0
             if teamID in self.moveMap.keys():
                 oldPos, newPos = self.moveMap[teamID]
-                moveY = self.teamHeight * (oldPos - newPos) * (1 - cubic_spline(self.animationTimer.clock / self.animationSpeed))
-                moveY = int(0.5 + moveY)
+                # old equation, using float (kept line for clarity)
+                # moveY = self.teamHeight * (oldPos - newPos) * (1 - cubic_spline(self.animationTimer.clock / self.animationSpeed))
+                n = self.teamHeight * (oldPos - newPos)
+                moveY = n - cubic_spline_int(n, self.animationTimer.clock, self.animationSpeed)
             if self.lockTo == teamID:
                 # keep locked team at screen center
-                self.pendingScroll = baseY + moveY - 408 + self.teamHeight / 2
+                self.pendingScroll = baseY + moveY - 408 + self.teamHeight // 2
 
             # only draw stuff that will appear on-screen
             if -self.teamHeight + 40 < baseY < 768:
