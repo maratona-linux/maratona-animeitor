@@ -13,8 +13,6 @@ class ScoreboardHandler (Handler):
     def __init__(self):
         Handler.__init__(self)
 
-        self.clock = pygame.time.Clock()
-
         self.teamHeight = 60
         self.maxOffsetY = len(Handler.contest.teamMap.items()) * self.teamHeight
 
@@ -191,7 +189,6 @@ class ScoreboardHandler (Handler):
 
         self.draw_header()
 
-        self.clock.tick(15)
         pygame.display.flip()
 
         return self
